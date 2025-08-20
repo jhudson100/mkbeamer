@@ -31,7 +31,7 @@ Code
 
 .. code:: python
     :class: size50
-        
+
     if foo:
         bar()
     else:
@@ -58,7 +58,7 @@ Images
 
 * We have an svg file here
 
-.. images:: width=300, redsphere.svg
+.. images:: alt=a red sphere,width=300, redsphere.svg
 
 
 Images
@@ -66,4 +66,11 @@ Images
 
 * We have three svg files here
 
-.. images:: width=200, redsphere.svg, greensphere.svg, bluesphere.svg
+.. images:: width=200, alt=red sphere,redsphere.svg, alt=green sphere,greensphere.svg, alt=blue sphere, bluesphere.svg
+
+Images?
+===========
+
+* Perhaps a PNG file is nice
+
+.. images:: width=400,alt=a torus,torus.jpg,height=300,alt=a cone,cone.png

@@ -18,61 +18,66 @@ def getContent(title: str,lines: list[Line]) -> list[str]:
         elif listItemRex.match(lines[i].content):
             i = parseList(output,lines,i)
         elif lines[i].content.startswith(".. "):
-            i,mf = parseBlockDirective(output,lines,i)
+            i,mf = Directive.handleBlockDirective(output,lines,i)
             if mf:
                 makeFragile=True
         else:
             error("Unknown slide content on line",lines[i].number,":",lines[i].content)
 
     if makeFragile:
-        output[idx] = r"\begin{frame}[fragile]" 
-            
+        output[idx] = r"\begin{frame}[fragile]"
+
     output.append(r"\end{frame}")
     return output
 
-def parseBlockDirective(output,lines,i):
-    assert lines[i].content.startswith(".. ")
+inlineRex = re.compile(r":(sup|sub|math|attach):`(\\`|[^`])+`")
 
-    #if the first word after the ..'s ends with a colon, this is a directive
-    #otherwise, it's a comment
-    tmp = lines[i].content.split()
-    if len(tmp) == 1:
-        #no directive; just a comment
-        return i+1
-    if not tmp[1].endswith("::") :
-        #warn about potential typo
-        if tmp[2].endswith(":"):
-            warn("On line",lines[i].number,": Possible mistyped directive? Ignoring...")
-        return i+1
+def outputText(output: list[str], line: Line):
+    i=0
+    o=[]
 
-    directiveName = tmp[1][:-2]
-
-    
-    j=i+1
-    
-    #include any indented and/or blank lines
-    while j < len(lines):
-        if len(lines[j].content.strip()) == 0 or lines[j].content.startswith(" "):
-            j+=1
+    while i < len(line.content):
+        c = line.content[i]
+        if c == '\\':
+            #next character is taken literally
+            i+=1
+            if i == len(line.content):
+                error("On line",line.number,": Trailing backslash")
+            o.append(line.content[i])
+            i+=1
+        elif c == '|':
+            #fancy character
+            i+=1
+            j=i
+            while True:
+                if j == len(line.content):
+                    error("On line",line.number,": Unpaired pipe (|)")
+                if line.content[j] == '|':
+                    break
+                j+=1
+            symbol = line.content[i:j]
+            assert 0, "FIXME: INSERT SYMBOL"
+            i = j+1
         else:
-            #end of file or unindented line
-            break
+            m = inlineRex.match( line.content,i )
+            if m:
+                command = m.group(1)
+                assert 0
+                i=m.end()+1
+            else:
+                o.append(c)
+                i+=1
 
-    #directive content goes from i to j-1 inclusive
-    directiveContent = lines[i:j]
-    directiveInfo = Directive.process(output,directiveName,directiveContent)
-    return j, directiveInfo.makeFragile
+    txt = "".join(o)
+    output.append(txt)
 
-    
 
-def outputText(output: OutputList, line: Line):
-    output.append( line.content )
-    
-    
+
+
 def parseList(output: list[str], lines: list[Line], i: int):
 
     nestingLevel=-1
-    
+
     while i < len(lines) and listItemRex.match( lines[i].content ):
         line = lines[i]
         sp = numLeadingSpaces(line)
@@ -89,14 +94,17 @@ def parseList(output: list[str], lines: list[Line], i: int):
             nestingLevel-=1
 
         tmp = lines[i].content.strip()
+        assert tmp.startswith("*")
         #remove the leading bullet
         tmp = tmp[1:]
         #remove any spaces after the bullet
         tmp = tmp.lstrip()
 
+        newitem = Line(number=lines[i].number, content=tmp )
+
         output.append(r"\item ")
         output.changeIndent(1)
-        outputText(output,Line(number=line.number,content=tmp))
+        outputText(output,newitem)
         output.changeIndent(-1)
         i+=1
 
@@ -106,9 +114,3 @@ def parseList(output: list[str], lines: list[Line], i: int):
         nestingLevel-=1
 
     return i
-        
-        
-
-
-
-    

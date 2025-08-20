@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 
-#Q&D script...
+#TODO:
+#   -> |item| substitutions
+#   -> literals: `...`
+#   -> math (inline, block)
+#   -> sup, sub
+#   -> attachments
+#   -> tables
+#   -> gap option in images directive
+#   -> inline images
 
 import argparse
 import sys
@@ -65,8 +73,12 @@ def main(args):
 
     os.chdir(os.path.dirname(outfile))
     #need to do twice to get page references correct
-    subprocess.call(["xelatex","-shell-escape",outfile], stdin=subprocess.DEVNULL)
-    subprocess.call(["xelatex","-shell-escape",outfile], stdin=subprocess.DEVNULL)
+
+    #ref:https://tex.stackexchange.com/questions/149185/xelatex-quiet-output-and-halt-on-error
+    #"-interaction=batchmode",
+    xelatex=["xelatex","-halt-on-error","-shell-escape"]
+    subprocess.check_call(xelatex+[outfile], stdin=subprocess.DEVNULL)
+    subprocess.check_call(xelatex+[outfile], stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL)
 
 
 

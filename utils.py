@@ -32,16 +32,16 @@ class OutputList:
             tmp = self.owner.data[self.i]
             self.i+=1
             return tmp
-            
+
     def __init__(self):
         self.data=[]
         self.indent=0
-        
+
     def changeIndent(self,delta):
         self.indent += delta
         if self.indent < 0 :
             self.indent=0
-            
+
     def append(self,*args):
         idx = len(self.data)
         tmp = " ".join(args)
@@ -52,7 +52,7 @@ class OutputList:
     def __setitem__(self,idx,value):
         assert type(value) == str
         self.data[idx] = value
-        
+
     def __iter__(self):
         return OutputList.Iterator(self)
 
@@ -62,7 +62,13 @@ def error(*msg):
     s = " ".join(t)
     print(s)
     sys.exit(1)
-    
+
+
+def warn(*msg):
+    t = [str(x) for x in msg]
+    s = " ".join(t)
+    print(s)
+
 
 def numLeadingSpaces(line:Line):
     ns=0

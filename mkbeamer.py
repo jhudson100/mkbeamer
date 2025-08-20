@@ -6,10 +6,11 @@ import argparse
 import sys
 import re
 from utils import Line, Section
-import preamble 
+import preamble
 import section
 import Directive
 import os.path
+import subprocess
 
 def main(args):
 
@@ -18,17 +19,17 @@ def main(args):
     parser.add_argument( "-o", dest="output", help="Output filename. Can also be specified as --output" )
     parser.add_argument( "--output", dest="output", help="Output filename. Can also be specified as -o")
     parser.add_argument( "--no-minted",dest="no_minted",action="store_true", help="Do not use the 'minted' package for code blocks")
-    
+
     args = parser.parse_args(args)
 
-    infile = args.filename
-    outfile = args.output
+    infile = os.path.abspath(args.filename)
+    outfile = os.path.abspath(args.output)
 
-    docroot = os.path.dirname(os.path.abspath(infile))
-    
+    docroot = os.path.dirname(infile)
+
     if args.no_minted:
         Directive.setUseMinted(False)
-        
+
     if outfile == None:
         if infile.endswith(".rst"):
             outfile = infile[:-4]+".tex"
@@ -43,10 +44,11 @@ def main(args):
     with open(infile) as fp:
         inputLines = fp.readlines()
 
+    #break the input file up into separate slides (sections
     sections = breakIntoSections(inputLines)
 
     title = "FIXME:TITLE"
-    
+
     print(preamble.getPreamble(title=title,docroot=docroot) , file=ofp)
 
     for slide in sections:
@@ -56,10 +58,16 @@ def main(args):
         )
         for s in tmp:
             print(s,file=ofp)
-     
+
     print(preamble.getPostamble(),file=ofp)
 
     ofp.close()
+
+    os.chdir(os.path.dirname(outfile))
+    #need to do twice to get page references correct
+    subprocess.call(["xelatex","-shell-escape",outfile], stdin=subprocess.DEVNULL)
+    subprocess.call(["xelatex","-shell-escape",outfile], stdin=subprocess.DEVNULL)
+
 
 
 def breakIntoSections(lines):

@@ -5,24 +5,11 @@
 import argparse
 import sys
 import re
-from dataclasses import dataclass
-
-@dataclass
-class Section:
-    title: str
-    content: list[str]
-
-#FIXME: Move this into a separate file
-preamble=r"""\documentclass{beamer}
-\title{%TITLE%}
-\begin{document}
-\frame{\titlepage}
-"""
-
-
-postamble=r"""
-\end{document}
-"""
+from utils import Line, Section
+import preamble 
+import section
+import Directive
+import os.path
 
 def main(args):
 
@@ -30,11 +17,18 @@ def main(args):
     parser.add_argument("filename")
     parser.add_argument( "-o", dest="output", help="Output filename. Can also be specified as --output" )
     parser.add_argument( "--output", dest="output", help="Output filename. Can also be specified as -o")
+    parser.add_argument( "--no-minted",dest="no_minted",action="store_true", help="Do not use the 'minted' package for code blocks")
+    
     args = parser.parse_args(args)
 
     infile = args.filename
     outfile = args.output
 
+    docroot = os.path.dirname(os.path.abspath(infile))
+    
+    if args.no_minted:
+        Directive.setUseMinted(False)
+        
     if outfile == None:
         if infile.endswith(".rst"):
             outfile = infile[:-4]+".tex"
@@ -49,19 +43,21 @@ def main(args):
     with open(infile) as fp:
         inputLines = fp.readlines()
 
-    slides = breakIntoSections(inputLines)
+    sections = breakIntoSections(inputLines)
 
-    tmp = preamble.replace("%TITLE%","title goes here")
-    print(tmp,file=ofp)
+    title = "FIXME:TITLE"
+    
+    print(preamble.getPreamble(title=title,docroot=docroot) , file=ofp)
 
-    for slide in slides:
-        print(r"\begin{frame}",file=ofp)
-        print(r"\frametitle{",slide.title,"}",file=ofp)
-        #FIXME: This is a stub
-        print("CONTENT",file=ofp)
-        print(r"\end{frame}",file=ofp)
-
-    print(postamble,file=ofp)
+    for slide in sections:
+        tmp: list[str] = section.getContent(
+            title=slide.title,
+            lines=slide.content
+        )
+        for s in tmp:
+            print(s,file=ofp)
+     
+    print(preamble.getPostamble(),file=ofp)
 
     ofp.close()
 
@@ -102,7 +98,8 @@ def breakIntoSections(lines):
         title = lines[pair[0]].strip()
         #underline is next line
         #blank line is next line
-        content = lines[ pair[0]+3:pair[1] ]
+        content = [ Line( content=lines[i], number=i+1 ) for i in range(pair[0]+3,pair[1])]
+        #content = lines[ pair[0]+3:pair[1] ]
         sections.append(Section(title=title,content=content))
 
     return sections

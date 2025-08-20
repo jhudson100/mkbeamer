@@ -1,0 +1,88 @@
+\documentclass[aspectratio=169]{beamer}
+%ENUMITEM%
+
+\usepackage{fontspec}
+\usepackage{minted}
+\usepackage{tcolorbox}
+\usepackage{svg}
+
+\begin{document}
+
+
+
+\svgsetup{}
+\svgpath{{%DOCROOT%}}
+
+%set title
+\title{%TITLE%}
+
+%set font
+%\setmainfont{Liberation Serif}
+\setsansfont{thefont}[
+    Path=/usr/share/fonts/sil-gentium-basic-book-fonts/ ,
+    UprightFont=GenBkBasR.ttf,
+    BoldFont=GenBkBasB.ttf,
+    ItalicFont=GenBkBasI.ttf,
+    BoldItalicFont=GenBkBasBI.ttf
+]
+%\setromanfont{Liberation Serif}
+\setmonofont{themonofont}[
+    Path=/usr/share/fonts/adobe-source-code-pro-fonts/ ,
+    UprightFont=SourceCodePro-Medium.otf,
+    BoldFont=SourceCodePro-Bold.otf,
+    ItalicFont=SourceCodePro-It.otf,
+    BoldItalicFont=SourceCodePro-BoldIt.otf
+]
+
+%we don't need a random date showing up in the presentation
+\date{}
+
+%get rid of the navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+%center the title
+%ref: https://tex.stackexchange.com/questions/329878/how-do-i-horizontally-center-the-title-in-a-slide
+\setbeamertemplate{frametitle}[default][center]
+
+%ref: https://tex.stackexchange.com/questions/66995/modify-footer-of-slides?noredirect=1&lq=1
+\definecolor {mySlideNumberColor}{RGB}{128,128,128}
+\setbeamertemplate{footline}
+{
+    \parbox{0.97\paperwidth}{
+        \vspace*{-6pt}
+        \hfill
+        \textcolor{mySlideNumberColor}{\insertframenumber{} of \inserttotalframenumber}
+    }
+}
+
+%set the background color
+%ref: https://tex.stackexchange.com/questions/8043/change-the-background-color-of-a-frame-in-beamer
+\definecolor{mybackgroundcolor}{RGB}{178, 178, 255}
+\setbeamercolor{background canvas}{bg=mybackgroundcolor}
+
+
+%font size and baseline skip
+\newcommand{\myTitleSize}{\fontsize{32pt}{32pt}\selectfont}
+
+%ref: https://tex.stackexchange.com/questions/133820/beamer-how-to-change-color-of-infolines-and-frame-title
+\setbeamercolor{title}{fg=black}
+\setbeamerfont{title}{size=\myTitleSize}
+
+
+%set title and line under title
+\setbeamercolor{frametitle}{fg=black}
+\definecolor{myheaderlinecolor}{RGB}{0, 0, 255}
+\setbeamercolor{my header line}{bg=myheaderlinecolor}
+\setbeamertemplate{frametitle}{%
+    \nointerlineskip%
+    \vskip24pt%
+    \begin{center}%
+    \usebeamerfont*{frametitle}\insertframetitle%
+    \end{center}%
+    \vskip-10pt%
+    \begin{beamercolorbox}[wd=0.94\paperwidth,ht=2pt,colsep=0pt]{my header line}%
+    \end{beamercolorbox}%
+}
+
+%create the title page
+\frame{\titlepage}

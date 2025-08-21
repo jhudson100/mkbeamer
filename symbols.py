@@ -1,16 +1,27 @@
 symbolsstr = """
-frac12  ½
-rarr    →
-larr    ←
-forall  ∀
-partial ∂
-reg     ®
-plusmn  ±
-alpha   α
-beta    β
-gamma   γ
-delta   δ
-epsilon ε
+frac12      ½
+rarr        →
+larr        ←
+forall      ∀
+partial     ∂
+reg         ®
+plusmn      ±
+infinity    ∞
+infin       ∞
+radic       √
+cap         ∩
+cup         ∪
+asymp       ≈
+isin        ∊
+sdot        ∙
+times       ×
+divide      ÷
+alpha       α
+beta        β
+gamma       γ
+delta       δ
+epsilon     ε
+Omega       Ω
 """
 
 symbols = {}

@@ -1,6 +1,6 @@
 
 
-from utils import error, numLeadingSpaces,Line
+from utils import error, warn, numLeadingSpaces,Line
 from dataclasses import dataclass
 import re
 
@@ -39,7 +39,7 @@ def processInlineDirective(output, line, matchObject: re.Match, docroot) -> None
         error(f"Unknown inline directive '{directiveName}' on line {line.number}")
 
     return matchObject.end()
- 
+
 
 def handleBlockDirective(output,lines,i,docroot):
     assert lines[i].content.startswith(".. ")
@@ -49,7 +49,7 @@ def handleBlockDirective(output,lines,i,docroot):
     tmp = lines[i].content.split()
     if len(tmp) == 1:
         #no directive; just a comment
-        return i+1, False   
+        return i+1, False
     if not tmp[1].endswith("::") :
         #warn about potential typo
         if tmp[2].endswith(":"):

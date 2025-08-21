@@ -1,6 +1,10 @@
 
 from utils import Line,error
 from Directive import testForInlineDirective, processInlineDirective
+import symbols
+import re
+
+hyperlinkrex=re.compile(r"`([^`]*)<([^>]+)>`__")
 
 #output inline text, processing backslashes (\), pipes (|alpha|), and inline directives
 def outputText(output: list[str], line: Line, docroot):
@@ -18,6 +22,22 @@ def outputText(output: list[str], line: Line, docroot):
             if not line.content[i].isspace():
                 o.append(line.content[i])
             i+=1
+        elif line.startswith("`",i):
+            if line.startswith("``",i):
+                #literal text
+                assert 0,"FIXME: FINISH"
+            else:
+                #hyperlink:
+                #`text to display<url>`__
+                m = hyperlinkrex.match(line.content,i)
+                if not m:
+                    error("Bad hyperlink on line",line.number)
+                display=m.group(1).strip()
+                url=m.group(2).strip()
+                if not display:
+                    display=url
+                o.append("\\href{"+url+"}{"+display+"}")
+                i = m.end()
         elif line.startswith("**",i) or line.startswith("*",i) or line.startswith("__",i):
             if line.startswith("**",i):
                 mode="textbf"
@@ -61,8 +81,11 @@ def outputText(output: list[str], line: Line, docroot):
             if m:
                 i = processInlineDirective(o,line,m,docroot)
             else:
-                o.append(line.content[i])
+                if line.content[i] == "&":
+                    o.append("\\&")
+                else:
+                    o.append(line.content[i])
                 i+=1
-        
+
     txt = "".join(o)
     output.append(txt)

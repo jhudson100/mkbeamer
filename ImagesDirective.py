@@ -50,6 +50,8 @@ def imagesDirective(output,directiveContent,docroot):
 
             if len(options):
                 options = "["+",".join(options)+"]"
+            else:
+                options=""
 
             if altText:
                 output.append(r"\pdftooltip{")
@@ -78,6 +80,6 @@ def imagesDirective(output,directiveContent,docroot):
             error("Unknown item in images directive at line",lines[0].number,":",item)
     output.append(r"\end{center}")
 
-    return DirectiveInfo(makeFragile=False)
+    return DirectiveInfo(makeFragile=True)
 
 registerBlockDirective("images",imagesDirective)

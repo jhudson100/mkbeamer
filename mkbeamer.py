@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
 #TODO:
-#   -> |item| substitutions
 #   -> literals: `...`
-#   -> math (inline, block)
 #   -> attachments
 #   -> tables
 #   -> gap option in images directive
@@ -21,39 +19,44 @@ import section
 import Directive
 import os.path
 import subprocess
+import tempfile
+import shutil
 
 def main(args):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("filename")
-    parser.add_argument( "-o", dest="output", help="Output filename. Can also be specified as --output" )
-    parser.add_argument( "--output", dest="output", help="Output filename. Can also be specified as -o")
-    parser.add_argument( "--no-minted",dest="no_minted",action="store_true", help="Do not use the 'minted' package for code blocks")
-    parser.add_argument( "--no-pdf",dest="no_pdf",action="store_true", help="Do not generate the PDF")
+    parser.add_argument("filename",default="slides.rst",nargs='?')
+    parser.add_argument( "-o", dest="pdfFilename", help="Filename for PDF file. Can also be specified as --output")
+    parser.add_argument( "--output", dest="pdffile", help="Filename for PDF file. Can also be specified as -o")
+    parser.add_argument( "--tex-output", dest="texfile", help="Store TeX to this filename. If omitted, a temporary file is used.")
+    parser.add_argument( "--no-pdf", dest="no_pdf", action="store_true", help="Do not generate PDF file")
+    parser.add_argument( "--once", dest="once", action="store_true", help="Only run XeLaTeX once")
+    parser.add_argument( "--keep-temp", dest="keep_temp", action="store_true", help="Keep temporary folder (for debugging)")
 
     args = parser.parse_args(args)
 
-    if not args.output:
-        assert 0,"FIXME: auto-generate output name"
+    if args.keep_temp:
+        tempdir = tempfile.mkdtemp()
+        print("Using temporary directory",tempdir)
+    else:
+        #prevent garbage collection
+        tempdirX = tempfile.TemporaryDirectory()
+        tempdir = tempdirX.name
 
     infile = os.path.abspath(args.filename)
-    outfile = os.path.abspath(args.output)
+
+    texfile = os.path.join( tempdir, "out.tex" )
+
+    if args.pdffile:
+        pdffile = os.path.abspath(args.pdffile)
+    else:
+        if infile.endswith(".rst"):
+            pdffile = infile[:-4]+".pdf"
+        else:
+            pdffile = infile+".pdf"
+
 
     docroot = os.path.dirname(infile)
-
-    if args.no_minted:
-        Directive.setUseMinted(False)
-
-    if outfile == None:
-        if infile.endswith(".rst"):
-            outfile = infile[:-4]+".tex"
-        else:
-            outfile = infile+".tex"
-
-    print(infile,outfile)
-
-    ofp = open(outfile,"w")
-
 
     with open(infile) as fp:
         inputLines = fp.readlines()
@@ -61,9 +64,17 @@ def main(args):
     #break the input file up into separate slides (sections
     sections = breakIntoSections(inputLines)
 
-    title = "FIXME:TITLE"
+    #The title of the first slide is the title of the presentation.
+    #Content of the first slide is ignored
+    title = sections[0].title
+    for x in sections[0].content:
+        if len(x.strip()):
+            warn("Content of first slide will be discarded")
+            break
+    sections = sections[1:]
 
-    print(preamble.getPreamble(title=title,docroot=docroot) , file=ofp)
+    texfp = open( texfile,"w")
+    print(preamble.getPreamble(title=title,docroot=docroot,tempdir=tempdir) , file=texfp)
 
     for slide in sections:
         tmp: list[str] = section.getContent(
@@ -72,22 +83,41 @@ def main(args):
             docroot=docroot
         )
         for s in tmp:
-            print(s,file=ofp)
+            print(s,file=texfp)
 
-    print(preamble.getPostamble(),file=ofp)
+    print(preamble.getPostamble(),file=texfp)
 
-    ofp.close()
+    texfp.close()
 
-    os.chdir(os.path.dirname(outfile))
+    if args.texfile:
+        shutil.copyfile( os.path.join(tempdir,"out.tex"), args.texfile)
+
     #need to do twice to get page references correct
-
     #ref:https://tex.stackexchange.com/questions/149185/xelatex-quiet-output-and-halt-on-error
     #"-interaction=batchmode",
     if not args.no_pdf:
-        xelatex=["xelatex","-halt-on-error","-shell-escape"]
-        subprocess.check_call(xelatex+[outfile], stdin=subprocess.DEVNULL)
-        subprocess.check_call(xelatex+[outfile], stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL)
 
+        #build pdf in temporary folder so we don't dump
+        #intermediate files in the working directory
+        os.chdir(tempdir)
+
+        xelatex=["xelatex","-halt-on-error","-shell-escape","out.tex"]
+
+        for i in range(2):
+            if not args.once or i == 0:
+                print("Running xelatex...")
+                P = subprocess.Popen(xelatex,stdin=subprocess.DEVNULL,
+                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                o,e = P.communicate()
+                if P.returncode:
+                    o=o.decode()
+                    print(o)
+                    break
+        else:
+            shutil.copyfile( os.path.join(tempdir,"out.pdf"), pdffile )
+
+    if args.keep_temp:
+        print("Note: Temporary directory was not deleted:",tempdir)
 
 
 def breakIntoSections(lines):

@@ -1,16 +1,22 @@
 \documentclass[aspectratio=169]{beamer}
 %ENUMITEM%
 
-\usepackage{fontspec}   %to allow change to font
-\usepackage{minted}     %for code listings
-\usepackage{tcolorbox}  %for boxes around code directives
-\usepackage{svg}        %allows including svg images
-\usepackage{graphicx}   %allows including raster images
-\usepackage{pdfcomment} %for tooltips (accessibility)
-\usepackage{hyperref}   %for hyperlinks and links to local files
+\usepackage{fontspec}       %to allow change to font
+\usepackage[cachedir=%MINTEDCACHE%]{minted}         %for code listings
+\usepackage{tcolorbox}      %for boxes around code directives
+\usepackage{svg}            %allows including svg images
+\usepackage{graphicx}       %allows including raster images
+\usepackage{pdfcomment}     %for tooltips (accessibility)
+\usepackage{hyperref}       %for hyperlinks and links to local files
 
 \begin{document}
 
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+\urlstyle{same}     %use same font for urls as document body
 
 
 \svgsetup{}
@@ -36,6 +42,7 @@
     ItalicFont=SourceCodePro-It.otf,
     BoldItalicFont=SourceCodePro-BoldIt.otf
 ]
+
 
 %we don't need a random date showing up in the presentation
 \date{}

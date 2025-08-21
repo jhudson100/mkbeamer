@@ -1,10 +1,11 @@
-from Directive import DirectiveInfo, registerDirective
+from Directive import DirectiveInfo, registerBlockDirective
 from utils import numLeadingSpaces
 
 useMinted=True
 
-def codeDirective(output,lines) -> DirectiveInfo:
+def codeDirective(output,directiveContent,docroot) -> DirectiveInfo:
 
+    lines = directiveContent
     tmp = lines[0].content.split()
     # .. code:: python
     if len(tmp) < 3:
@@ -76,4 +77,4 @@ def codeDirective(output,lines) -> DirectiveInfo:
 
     return DirectiveInfo(makeFragile=True)
 
-registerDirective("code",codeDirective)
+registerBlockDirective("code",codeDirective)

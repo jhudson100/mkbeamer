@@ -1,10 +1,12 @@
 import re
 from utils import error, numLeadingSpaces,Line,OutputList
 import Directive
+import symbols
+import text
 
 listItemRex = re.compile(r"\s*\*\s")
 
-def getContent(title: str,lines: list[Line]) -> list[str]:
+def getContent(title: str,lines: list[Line], docroot: str) -> list[str]:
     output = OutputList()
 
     idx = output.append(r"\begin{frame}")
@@ -16,9 +18,9 @@ def getContent(title: str,lines: list[Line]) -> list[str]:
         if 0 == len(lines[i].content.strip()):
             i += 1
         elif listItemRex.match(lines[i].content):
-            i = parseList(output,lines,i)
+            i = parseList(output=output,lines=lines,i=i,docroot=docroot)
         elif lines[i].content.startswith(".. "):
-            i,mf = Directive.handleBlockDirective(output,lines,i)
+            i,mf = Directive.handleBlockDirective(output=output,lines=lines,i=i,docroot=docroot)
             if mf:
                 makeFragile=True
         else:
@@ -30,51 +32,12 @@ def getContent(title: str,lines: list[Line]) -> list[str]:
     output.append(r"\end{frame}")
     return output
 
-inlineRex = re.compile(r":(sup|sub|math|attach):`(\\`|[^`])+`")
-
-def outputText(output: list[str], line: Line):
-    i=0
-    o=[]
-
-    while i < len(line.content):
-        c = line.content[i]
-        if c == '\\':
-            #next character is taken literally
-            i+=1
-            if i == len(line.content):
-                error("On line",line.number,": Trailing backslash")
-            o.append(line.content[i])
-            i+=1
-        elif c == '|':
-            #fancy character
-            i+=1
-            j=i
-            while True:
-                if j == len(line.content):
-                    error("On line",line.number,": Unpaired pipe (|)")
-                if line.content[j] == '|':
-                    break
-                j+=1
-            symbol = line.content[i:j]
-            assert 0, "FIXME: INSERT SYMBOL"
-            i = j+1
-        else:
-            m = inlineRex.match( line.content,i )
-            if m:
-                command = m.group(1)
-                assert 0
-                i=m.end()+1
-            else:
-                o.append(c)
-                i+=1
-
-    txt = "".join(o)
-    output.append(txt)
+inlineRex = re.compile(r":[a-z]+:`(\\`|[^`])+`")
 
 
 
 
-def parseList(output: list[str], lines: list[Line], i: int):
+def parseList(output: list[str], lines: list[Line], i: int, docroot:str):
 
     nestingLevel=-1
 
@@ -104,7 +67,7 @@ def parseList(output: list[str], lines: list[Line], i: int):
 
         output.append(r"\item ")
         output.changeIndent(1)
-        outputText(output,newitem)
+        text.outputText(output,newitem,docroot)
         output.changeIndent(-1)
         i+=1
 

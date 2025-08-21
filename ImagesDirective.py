@@ -1,9 +1,10 @@
-from Directive import DirectiveInfo, registerDirective
+from Directive import DirectiveInfo, registerBlockDirective
 from utils import warn
 import os.path
 
-def imagesDirective(output,lines):
+def imagesDirective(output,directiveContent,docroot):
 
+    lines=directiveContent
     spec = lines[0].content.strip()
     assert spec.startswith(".. images::")
     idx = spec.find("::")
@@ -29,7 +30,7 @@ def imagesDirective(output,lines):
         elif item.startswith("alt="):
             altText = item[4:].strip()
         elif litem.endswith(".svg") or litem.endswith(".jpg") or litem.endswith(".png"):
-            filename = os.path.abspath(item)
+            filename = os.path.abspath(os.path.join(docroot,item))
 
             options=[]
             if width != 0:
@@ -79,4 +80,4 @@ def imagesDirective(output,lines):
 
     return DirectiveInfo(makeFragile=False)
 
-registerDirective("images",imagesDirective)
+registerBlockDirective("images",imagesDirective)

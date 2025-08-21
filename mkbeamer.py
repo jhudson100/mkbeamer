@@ -4,12 +4,13 @@
 #   -> |item| substitutions
 #   -> literals: `...`
 #   -> math (inline, block)
-#   -> sup, sub
 #   -> attachments
 #   -> tables
 #   -> gap option in images directive
 #   -> inline images
-
+#   -> raw (block and inline)
+#   -> ordered lists
+#   -> bold \textbf and italic \textit and underline \underline
 import argparse
 import sys
 import re
@@ -29,6 +30,9 @@ def main(args):
     parser.add_argument( "--no-minted",dest="no_minted",action="store_true", help="Do not use the 'minted' package for code blocks")
 
     args = parser.parse_args(args)
+
+    if not args.output:
+        assert 0,"FIXME: auto-generate output name"
 
     infile = os.path.abspath(args.filename)
     outfile = os.path.abspath(args.output)
@@ -62,7 +66,8 @@ def main(args):
     for slide in sections:
         tmp: list[str] = section.getContent(
             title=slide.title,
-            lines=slide.content
+            lines=slide.content,
+            docroot=docroot
         )
         for s in tmp:
             print(s,file=ofp)

@@ -1,36 +1,47 @@
 
 
-from utils import error, numLeadingSpaces
+from utils import error, numLeadingSpaces,Line
 from dataclasses import dataclass
-useMinted=True
+import re
 
 @dataclass
 class DirectiveInfo:
     makeFragile: bool
 
-def setUseMinted(flag:bool):
-    global useMinted
-    useMinted=flag
-
-directiveHandlers={}
-def registerDirective(name, handler):
-    if name in directiveHandlers and directiveHandlers[name] != handler:
+blockHandlers={}
+def registerBlockDirective(name, handler):
+    if name in blockHandlers and blockHandlers[name] != handler:
         raise RuntimeError(f"Duplicate directive: {name}")
-    directiveHandlers[name]=handler
+    blockHandlers[name]=handler
+
+inlineHandlers={}
+def registerInlineDirective(name, handler):
+    if name in inlineHandlers and inlineHandlers[name] != handler:
+        raise RuntimeError(f"Duplicate directive: {name}")
+    inlineHandlers[name]=handler
 
 
-import CodeDirective
-import ImagesDirective
+inlineRex = re.compile(r"(?m):([a-z]+):`(\\`|[^`])+`")
 
-
-def process(output, directiveName, directiveContent) -> DirectiveInfo:
-    if directiveName in directiveHandlers:
-        return directiveHandlers[directiveName](output,directiveContent)
+def testForInlineDirective(line,i):
+    if i == 0 or line.content[i-1].isspace():
+        m = inlineRex.match( line.content,i )
+        return m
     else:
-        error(f"Unknown directive '{directiveName}' on line {directiveContent[0].number}")
+        return None
 
+def processInlineDirective(output, line, matchObject: re.Match, docroot) -> None:
+    directiveName = matchObject.group(1)
+    directiveContent = matchObject.group(2)
+    if directiveName in inlineHandlers:
+        inlineHandlers[directiveName](output=output,line=line,directiveName=directiveName,directiveContent=directiveContent,docroot=docroot)
+    else:
+        error(f"Unknown inline directive '{directiveName}' on line {line.number}")
 
-def handleBlockDirective(output,lines,i):
+    return matchObject.end()
+ 
+
+def handleBlockDirective(output,lines,i,docroot):
     assert lines[i].content.startswith(".. ")
 
     #if the first word after the ..'s ends with a colon, this is a directive
@@ -60,5 +71,18 @@ def handleBlockDirective(output,lines,i):
 
     #directive content goes from i to j-1 inclusive
     directiveContent = lines[i:j]
-    directiveInfo = process(output,directiveName,directiveContent)
+
+    if directiveName in blockHandlers:
+        directiveInfo = blockHandlers[directiveName](output=output,directiveContent=directiveContent,docroot=docroot)
+    else:
+        error(f"Unknown block directive '{directiveName}' on line {directiveContent[0].number}")
+
+
     return j, directiveInfo.makeFragile
+
+
+
+
+import CodeDirective
+import ImagesDirective
+import SuperSubDirective

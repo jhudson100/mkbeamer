@@ -74,3 +74,10 @@ Images?
 * Perhaps a PNG file is nice
 
 .. images:: width=400,alt=a torus,torus.jpg,height=300,alt=a cone,cone.png
+
+
+Scripts
+=========
+
+* We must breathe O\ :sub:`2` or H\ :sub:`2`\ O
+* x\ :sup:`2` + x + 1 = 0

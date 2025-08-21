@@ -81,3 +81,9 @@ Scripts
 
 * We must breathe O\ :sub:`2` or H\ :sub:`2`\ O
 * x\ :sup:`2` + x + 1 = 0
+* It is *important* that we **not** mess up __today__!!!
+* Some :raw:`\textbf{raw}` inline content
+
+.. raw::
+
+    We have \textit{here} some raw block content

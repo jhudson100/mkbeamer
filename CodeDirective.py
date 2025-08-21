@@ -49,7 +49,6 @@ def codeDirective(output,directiveContent,docroot) -> DirectiveInfo:
     #and remove that many items
     minIndent = min( [ numLeadingSpaces(line) for line in filter(lambda s: len(s.content.strip())>0, lines[1:]) ] )
 
-    print("mindent=",minIndent)
 
     #skip leading blank lines
     while i < len(lines):

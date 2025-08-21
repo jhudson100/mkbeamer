@@ -10,7 +10,8 @@ from dataclasses import dataclass
 class Line:
     content: str
     number: int
-
+    def startswith(self,txt,where=0):
+        return self.content.startswith(txt,where)
 
 #one section (slide)
 @dataclass

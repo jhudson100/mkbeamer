@@ -10,7 +10,9 @@
 #   -> inline images
 #   -> raw (block and inline)
 #   -> ordered lists
-#   -> bold \textbf and italic \textit and underline \underline
+#   -> colors?
+#   -> hyperlinks
+
 import argparse
 import sys
 import re
@@ -28,6 +30,7 @@ def main(args):
     parser.add_argument( "-o", dest="output", help="Output filename. Can also be specified as --output" )
     parser.add_argument( "--output", dest="output", help="Output filename. Can also be specified as -o")
     parser.add_argument( "--no-minted",dest="no_minted",action="store_true", help="Do not use the 'minted' package for code blocks")
+    parser.add_argument( "--no-pdf",dest="no_pdf",action="store_true", help="Do not generate the PDF")
 
     args = parser.parse_args(args)
 
@@ -81,9 +84,10 @@ def main(args):
 
     #ref:https://tex.stackexchange.com/questions/149185/xelatex-quiet-output-and-halt-on-error
     #"-interaction=batchmode",
-    xelatex=["xelatex","-halt-on-error","-shell-escape"]
-    subprocess.check_call(xelatex+[outfile], stdin=subprocess.DEVNULL)
-    subprocess.check_call(xelatex+[outfile], stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL)
+    if not args.no_pdf:
+        xelatex=["xelatex","-halt-on-error","-shell-escape"]
+        subprocess.check_call(xelatex+[outfile], stdin=subprocess.DEVNULL)
+        subprocess.check_call(xelatex+[outfile], stdin=subprocess.DEVNULL,stdout=subprocess.DEVNULL)
 
 
 

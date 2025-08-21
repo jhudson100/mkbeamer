@@ -3,7 +3,7 @@
 
 \usepackage{fontspec}       %to allow change to font
 \usepackage[cachedir=%MINTEDCACHE%]{minted}         %for code listings
-\usepackage{tcolorbox}      %for boxes around code directives
+\usepackage[fitting]{tcolorbox}      %for boxes around code directives
 \usepackage{svg}            %allows including svg images
 \usepackage{graphicx}       %allows including raster images
 \usepackage{pdfcomment}     %for tooltips (accessibility)
@@ -18,6 +18,13 @@
 }
 \urlstyle{same}     %use same font for urls as document body
 
+
+%minted happily marks errors that we don't want to mark
+%disable that behavior.
+% ref: https://tex.stackexchange.com/a/289068
+% ref: https://github.com/gpoore/minted/issues/69
+\AtBeginEnvironment{minted}{%
+    \renewcommand{\fcolorbox}[4][]{#4}}
 
 \svgsetup{}
 \svgpath{{%DOCROOT%}}

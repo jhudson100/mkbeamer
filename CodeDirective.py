@@ -37,7 +37,7 @@ def codeDirective(output,directiveContent,docroot) -> DirectiveInfo:
 
     if useMinted:
         #tcbox=fitted, tcolorbox=full page width
-        output.append(r"\begin{tcolorbox}[colback=white,colframe=black]%")
+        output.append(r"\begin{tcolorbox}[colback=white,colframe=black,boxsep=0pt,left=0pt,right=0pt,top=0pt,bottom=0pt]%")
         fsize = size100 * size/100
         spacing = fsize * 1.1
         output.append(r"\fontsize{"+str(fsize)+"pt}{"+str(spacing)+"pt}\selectfont")

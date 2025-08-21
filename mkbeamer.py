@@ -26,12 +26,12 @@ def main(args):
 
     parser = argparse.ArgumentParser()
     parser.add_argument("filename",default="slides.rst",nargs='?')
-    parser.add_argument( "-o", dest="pdfFilename", help="Filename for PDF file. Can also be specified as --output")
-    parser.add_argument( "--output", dest="pdffile", help="Filename for PDF file. Can also be specified as -o")
+    parser.add_argument( "-o","--output", dest="pdffile", help="Filename for PDF file. Can also be specified as -o")
     parser.add_argument( "--tex-output", dest="texfile", help="Store TeX to this filename. If omitted, a temporary file is used.")
     parser.add_argument( "--no-pdf", dest="no_pdf", action="store_true", help="Do not generate PDF file")
     parser.add_argument( "--once", dest="once", action="store_true", help="Only run XeLaTeX once")
     parser.add_argument( "--keep-temp", dest="keep_temp", action="store_true", help="Keep temporary folder (for debugging)")
+    parser.add_argument( "-v","--verbose",dest="verbose", action="store_true",help="Verbose output")
 
     args = parser.parse_args(args)
 
@@ -71,12 +71,11 @@ def main(args):
         if len(x.strip()):
             warn("Content of first slide will be discarded")
             break
-    sections = sections[1:]
 
     texfp = open( texfile,"w")
     print(preamble.getPreamble(title=title,docroot=docroot,tempdir=tempdir) , file=texfp)
 
-    for slide in sections:
+    for slide in sections[1:]:
         tmp: list[str] = section.getContent(
             title=slide.title,
             lines=slide.content,
@@ -107,17 +106,51 @@ def main(args):
             if not args.once or i == 0:
                 print("Running xelatex...")
                 P = subprocess.Popen(xelatex,stdin=subprocess.DEVNULL,
-                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                o,e = P.communicate()
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT)
+                alltext=[]
+                while True:
+                    tmp = P.stdout.read(32)
+                    if len(tmp) == 0:
+                        break
+                    tmp=tmp.decode()
+                    alltext.append(tmp)
+                    if args.verbose:
+                        sys.stdout.write(tmp)
+                        sys.stdout.flush()
                 if P.returncode:
-                    o=o.decode()
-                    print(o)
                     break
+                analyzeOutput("".join(alltext),sections)
         else:
             shutil.copyfile( os.path.join(tempdir,"out.pdf"), pdffile )
 
     if args.keep_temp:
         print("Note: Temporary directory was not deleted:",tempdir)
+
+overfullrex = re.compile(r"Overfull \\vbox [^\n]* at line (\d+)")
+def analyzeOutput(output,sections):
+
+    sliderex=re.compile(r"\[(\d+)\]")
+    perSlideOutput=[]
+    m = sliderex.search(output,0)
+    while m:
+        m2 = sliderex.search(output,m.end())
+        perSlideOutput.append( output[ m.end():m2.start() if m2 else len(output) ] )
+        m=m2
+
+    for snum,so in enumerate(perSlideOutput):
+        if overfullrex.search(so):
+            firstline = sections[snum+1].content[0].number
+            lastline = sections[snum+1].content[-1].number
+            print("Slide",snum+2,"is overfull (input lines",firstline,"to",lastline,")")
+
+
+    pagecountrex = re.compile(r"(?m)^Output written on [^(]+ \((\d+) page")
+    m = pagecountrex.search(output)
+    if m:
+        print(m.group(1),"pages")
+
+
 
 
 def breakIntoSections(lines):

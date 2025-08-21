@@ -61,7 +61,7 @@ Images
 
 * We have an svg file here
 
-.. images:: alt=a red sphere,width=300, redsphere.svg
+.. images:: alt=a red sphere,width=30, redsphere.svg
 
 
 Images
@@ -69,14 +69,14 @@ Images
 
 * We have three svg files here
 
-.. images:: width=200, alt=red sphere,redsphere.svg, alt=green sphere,greensphere.svg, alt=blue sphere, bluesphere.svg
+.. images:: width=25, alt=red sphere,redsphere.svg, alt=green sphere,greensphere.svg, alt=blue sphere, bluesphere.svg
 
 Images?
 ===========
 
 * Perhaps a PNG file is nice
 
-.. images:: width=400,alt=a torus,torus.jpg,height=300,alt=a cone,cone.png
+.. images:: width=40,alt=a torus,torus.jpg,width=0,height=20,alt=a cone,cone.png
 
 
 Scripts
@@ -100,3 +100,39 @@ Math
 .. math::
 
     \frac{\alpha}{\beta} = 1
+
+Characters
+=============
+
+* Should we worry about special characters?
+    * Is x > y? Or x < y?
+    * 100%!
+    * a_b_c
+    * a\|b
+    * #1
+    * 1 & 2
+    * if(x) {} else { foo }
+    * cd ~bob
+
+Lots of Content
+===================
+
+* This slide has lots of content
+    * Not much that is important, however
+    * But we have several items
+* Then we have more content
+    * Yes, we do
+    * Lots and lots of content
+        * Tons of it
+    * We like content
+* Content is the think to be content with
+    * Contented content
+    * That's the point of contenting yourself with content
+    * Content of content
+* Table of contents
+    * Contents of the table
+    * We like contents
+* Those are content with contents
+    * Pages of content
+    * Contented pages
+* The end

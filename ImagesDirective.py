@@ -1,5 +1,5 @@
 from Directive import DirectiveInfo, registerBlockDirective
-from utils import warn
+from utils import warn,error
 import os.path
 
 def imagesDirective(output,directiveContent,docroot):
@@ -10,7 +10,7 @@ def imagesDirective(output,directiveContent,docroot):
     idx = spec.find("::")
     spec = spec[idx+2:].strip()
     lst = spec.split(",")
-    width=0
+    width=30
     height=0
     altText=None
 
@@ -20,13 +20,10 @@ def imagesDirective(output,directiveContent,docroot):
         litem = item.lower()
         if item.startswith("width="):
             i = item.find("=")
-            #"canonical" size of screen is 1366x768;
-            #latex doesn't use pixels, but existing slides
-            #use that as a base for image size
-            width = float( item[i+1:] )/1366
+            width = float( item[i+1:] )*0.01
         elif item.startswith("height="):
             i = item.find("=")
-            height = float( item[i+1:] )/768
+            height = float( item[i+1:] )*0.01
         elif item.startswith("alt="):
             altText = item[4:].strip()
         elif litem.endswith(".svg") or litem.endswith(".jpg") or litem.endswith(".png"):
@@ -37,7 +34,7 @@ def imagesDirective(output,directiveContent,docroot):
                 options.append("width={"+str(width)+r"\paperwidth}")
             if height != 0:
                 #we scale everything with regard to the page width
-                options.append("height={"+str(height)+"\paperwidth}")
+                options.append("height={"+str(height)+r"\paperwidth}")
 
 
             if not altText:
@@ -48,6 +45,10 @@ def imagesDirective(output,directiveContent,docroot):
                     # ~ #don't let alt text carry over to future files
                     # ~ altText=None
 
+            if litem.endswith(".svg"):
+                #don't try to interpret text as LaTeX input;
+                #this avoids font changes and re-formatting
+                options.append("inkscapelatex=false")
             if len(options):
                 options = "["+",".join(options)+"]"
             else:

@@ -6,6 +6,19 @@ import re
 
 hyperlinkrex=re.compile(r"`([^`]*)<([^>]+)>`__")
 
+#ref: https://en.wikibooks.org/wiki/LaTeX/Special_Characters
+specials={
+    "<"     : r"{\textless}",
+    ">"     : r"{\textgreater}",
+    "%"     : r"{\%}",
+    "_"     : r"{\_}",
+    "|"     : r"{\textbar}",
+    "#"     : r"{\#}",
+    "&"     : r"{\&}",
+    "{"     : r"{\{}",
+    "}"     : r"{\}}",
+    "~"     : r"\textasciitilde{}",
+}
 #output inline text, processing backslashes (\), pipes (|alpha|), and inline directives
 def outputText(output: list[str], line: Line, docroot):
     i=0
@@ -20,7 +33,9 @@ def outputText(output: list[str], line: Line, docroot):
             if i == len(line.content):
                 error("On line",line.number,": Trailing backslash")
             if not line.content[i].isspace():
-                o.append(line.content[i])
+                ch = line.content[i]
+                ech = specials.get(ch,ch)
+                o.append(ech)
             i+=1
         elif line.startswith("`",i):
             if line.startswith("``",i):
@@ -81,10 +96,9 @@ def outputText(output: list[str], line: Line, docroot):
             if m:
                 i = processInlineDirective(o,line,m,docroot)
             else:
-                if line.content[i] == "&":
-                    o.append("\\&")
-                else:
-                    o.append(line.content[i])
+                ch = line.content[i]
+                ech = specials.get(ch,ch)
+                o.append(ech)
                 i+=1
 
     txt = "".join(o)

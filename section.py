@@ -1,3 +1,5 @@
+#todo: See https://tex.stackexchange.com/questions/313736/in-beamer-whats-the-right-way-to-scale-a-slide-element-down-to-better-fit
+
 import re
 from utils import error, numLeadingSpaces,Line,OutputList
 import Directive

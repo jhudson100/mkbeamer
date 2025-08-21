@@ -20,7 +20,9 @@ def getContent(title: str,lines: list[Line], docroot: str) -> list[str]:
         elif listItemRex.match(lines[i].content):
             i = parseList(output=output,lines=lines,i=i,docroot=docroot)
         elif lines[i].content.startswith(".. "):
-            i,mf = Directive.handleBlockDirective(output=output,lines=lines,i=i,docroot=docroot)
+            tmp = Directive.handleBlockDirective(output=output,lines=lines,i=i,docroot=docroot)
+            
+            i,mf = tmp
             if mf:
                 makeFragile=True
         else:

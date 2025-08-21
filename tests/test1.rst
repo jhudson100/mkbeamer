@@ -87,3 +87,13 @@ Scripts
 .. raw::
 
     We have \textit{here} some raw block content
+
+Math
+=====
+
+* We know that :math:`x^2 + y^2 + z^2 = 1`
+* But it is also true that
+
+.. math::
+
+    \frac{\alpha}{\beta} = 1

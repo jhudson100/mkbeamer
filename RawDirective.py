@@ -4,7 +4,6 @@ from text import outputText
 from utils import Line
 
 def rawInline(output,line,directiveName,directiveContent,docroot):
-    print("RI:",directiveContent)
     output.append(directiveContent)
     
 def rawBlock(output,directiveContent,docroot) -> DirectiveInfo:

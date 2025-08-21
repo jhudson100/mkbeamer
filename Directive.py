@@ -21,7 +21,7 @@ def registerInlineDirective(name, handler):
     inlineHandlers[name]=handler
 
 
-inlineRex = re.compile(r"(?m):([a-z]+):`(\\`|[^`])+`")
+inlineRex = re.compile(r"(?m):([a-z]+):`((\\`|[^`])+)`")
 
 def testForInlineDirective(line,i):
     if i == 0 or line.content[i-1].isspace():
@@ -49,12 +49,12 @@ def handleBlockDirective(output,lines,i,docroot):
     tmp = lines[i].content.split()
     if len(tmp) == 1:
         #no directive; just a comment
-        return i+1
+        return i+1, False   
     if not tmp[1].endswith("::") :
         #warn about potential typo
         if tmp[2].endswith(":"):
             warn("On line",lines[i].number,": Possible mistyped directive? Ignoring...")
-        return i+1
+        return i+1,False
 
     directiveName = tmp[1][:-2]
 
@@ -77,7 +77,6 @@ def handleBlockDirective(output,lines,i,docroot):
     else:
         error(f"Unknown block directive '{directiveName}' on line {directiveContent[0].number}")
 
-
     return j, directiveInfo.makeFragile
 
 
@@ -87,3 +86,4 @@ import CodeDirective
 import ImagesDirective
 import SuperSubDirective
 import RawDirective
+import MathDirective

@@ -8,7 +8,6 @@
 #   -> tables
 #   -> gap option in images directive
 #   -> inline images
-#   -> raw (block and inline)
 #   -> ordered lists
 #   -> colors?
 #   -> hyperlinks

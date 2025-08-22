@@ -15,13 +15,13 @@ def getContent(section: Section, docroot:str) -> list[str]:
     for key in options:
         if key not in sectionOptions:
             error(f"Unknown option '{key}' for section at line",section.firstLine)
-            
+
     output = OutputList()
 
     idx = output.append(r"\begin{frame}")
 
-    output.append(r"\BeginAccSupp{method=escape,unicode,ActualText=FIXME}")
-    
+    # ~ output.append(r"\BeginAccSupp{method=escape,unicode,ActualText=FIXME}")
+
     output.append(r"\frametitle{",title,"}")
 
     if "scale" in options:
@@ -40,7 +40,7 @@ def getContent(section: Section, docroot:str) -> list[str]:
             i = UnorderedList.process(output=output,lines=lines,i=i,docroot=docroot)
         elif lines[i].content.startswith(".. "):
             tmp = Directive.handleBlockDirective(output=output,lines=lines,i=i,docroot=docroot)
-            
+
             i,mf = tmp
             if mf:
                 makeFragile=True
@@ -51,8 +51,8 @@ def getContent(section: Section, docroot:str) -> list[str]:
         output.append("} %vbox")
         output.append("} %scalebox")
 
-    output.append("\EndAccSupp{}")
-    
+    # ~ output.append(r"\EndAccSupp{}")
+
     output.append(r"\end{frame}")
 
     if makeFragile:
@@ -69,7 +69,7 @@ def split(lines):
     #ex:
     #   Title
     #   =========[scale=0.8]
-    
+
     underlinerex = re.compile(r"^(={3,})(\[([^]]*)\])?[ \t]*$")
     sectionStarts=[]
 
@@ -114,8 +114,8 @@ def split(lines):
                 opt=opt.strip()
                 key,value=opt.split("=")
                 options[key]=value
-                
-            
+
+
         #blank line is next line
 
         firstLine=pair[0]
@@ -129,6 +129,3 @@ def split(lines):
 
 
 # ~ inlineRex = re.compile(r":[a-z]+:`(\\`|[^`])+`")
-
-
-

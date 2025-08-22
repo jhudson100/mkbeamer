@@ -33,14 +33,14 @@ def codeDirective(output,directiveContent,docroot) -> DirectiveInfo:
     #we should now be sitting at a blank linke
 
     #size for 100%, in points
-    size100 = 11
+    size100 = 9
 
     if useMinted:
         #tcbox=fitted, tcolorbox=full page width
         output.append(r"\begin{tcolorbox}[colback=white,colframe=black,boxsep=0pt,left=0pt,right=0pt,top=0pt,bottom=0pt]%")
         fsize = size100 * size/100
         spacing = fsize * 1.1
-        output.append(r"\fontsize{"+str(fsize)+"pt}{"+str(spacing)+"pt}\selectfont")
+        output.append(r"\fontsize{"+str(fsize)+"pt}{"+str(spacing)+r"pt}\selectfont")
         output.append(r"\begin{minted}[bgcolor=white,breaklines=true]{c}")
     else:
         output.append(r"\begin{verbatim}")

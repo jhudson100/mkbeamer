@@ -50,10 +50,9 @@ def main(args):
     if args.pdffile:
         pdffile = os.path.abspath(args.pdffile)
     else:
-        if infile.endswith(".rst"):
-            pdffile = infile[:-4]+".pdf"
-        else:
-            pdffile = infile+".pdf"
+        tmp = os.path.dirname(os.path.abspath(infile))
+        foldername = tmp.split(os.path.sep)[-1]
+        pdffile = os.path.abspath(os.path.join(tmp,foldername+".pdf"))
 
 
     docroot = os.path.dirname(infile)
@@ -62,7 +61,7 @@ def main(args):
         inputLines = fp.readlines()
 
     #break the input file up into separate slides (sections
-    sections = breakIntoSections(inputLines)
+    sections = section.split(inputLines)
 
     #The title of the first slide is the title of the presentation.
     #Content of the first slide is ignored
@@ -77,8 +76,9 @@ def main(args):
 
     for slide in sections[1:]:
         tmp: list[str] = section.getContent(
-            title=slide.title,
-            lines=slide.content,
+            section=slide,
+            # ~ title=slide.title,
+            # ~ lines=slide.content,
             docroot=docroot
         )
         for s in tmp:
@@ -123,11 +123,12 @@ def main(args):
                 analyzeOutput("".join(alltext),sections)
         else:
             shutil.copyfile( os.path.join(tempdir,"out.pdf"), pdffile )
+            print("PDF file written to",pdffile)
 
     if args.keep_temp:
         print("Note: Temporary directory was not deleted:",tempdir)
 
-overfullrex = re.compile(r"Overfull \\vbox [^\n]* at line (\d+)")
+overfullrex = re.compile(r"Overfull \\vbox \(([0-9.]+\w+) too high\) detected at line (\d+)")
 def analyzeOutput(output,sections):
 
     sliderex=re.compile(r"\[(\d+)\]")
@@ -139,10 +140,11 @@ def analyzeOutput(output,sections):
         m=m2
 
     for snum,so in enumerate(perSlideOutput):
-        if overfullrex.search(so):
+        m = overfullrex.search(so)
+        if m:
             firstline = sections[snum+1].content[0].number
             lastline = sections[snum+1].content[-1].number
-            print("Slide",snum+2,"is overfull (input lines",firstline,"to",lastline,")")
+            print("Slide",snum+2,"is overfull by",m.group(1),"(input lines",firstline,"to",lastline,")")
 
 
     pagecountrex = re.compile(r"(?m)^Output written on [^(]+ \((\d+) page")
@@ -151,48 +153,5 @@ def analyzeOutput(output,sections):
         print(m.group(1),"pages")
 
 
-
-
-def breakIntoSections(lines):
-    underlinerex = re.compile(r"^={3,}[ \t]*$")
-    sectionStarts=[]
-
-    #find the location of slide title lines
-    for i in range(2,len(lines)):
-        potentialBlankLine = lines[i]
-        if len(potentialBlankLine.strip()) == 0:
-            potentialTitle = lines[i-2].rstrip()
-            potentialUnderline = lines[i-1].rstrip()
-            m = underlinerex.match(potentialUnderline)
-            if m and len(m.group(0)) >= len(potentialTitle):
-                sectionStarts.append( i-2 )
-
-    #make list of slide start/end locations
-    sectionRanges=[]
-    start=0
-    for end in sectionStarts:
-        sectionRanges.append( [start,end] )
-        start=end
-    sectionRanges.append( [start,len(lines)] )
-
-    #trim off leading or trailing blank lines
-    for pair in sectionRanges:
-        while pair[0] < pair[1] and len( lines[pair[0]].strip()) == 0:
-            pair[0]+=1
-        while pair[1] > pair[0] and len(lines[pair[1]-1].strip()) == 0:
-            pair[1]-=1
-
-    sections=[]
-    for pair in sectionRanges:
-        if pair[0] >= pair[1]:
-            continue
-        title = lines[pair[0]].strip()
-        #underline is next line
-        #blank line is next line
-        content = [ Line( content=lines[i], number=i+1 ) for i in range(pair[0]+3,pair[1])]
-        #content = lines[ pair[0]+3:pair[1] ]
-        sections.append(Section(title=title,content=content))
-
-    return sections
 
 main(sys.argv[1:])

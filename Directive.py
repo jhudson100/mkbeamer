@@ -87,3 +87,4 @@ import ImagesDirective
 import SuperSubDirective
 import RawDirective
 import MathDirective
+import NoteDirective

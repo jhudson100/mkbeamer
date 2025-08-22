@@ -115,7 +115,7 @@ Characters
     * cd ~bob
 
 Lots of Content
-===================
+===================[scale=0.7]
 
 * This slide has lots of content
     * Not much that is important, however

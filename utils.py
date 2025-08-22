@@ -18,6 +18,9 @@ class Line:
 class Section:
     title: str
     content: list[Line]
+    options: dict[str,str]
+    firstLine: int
+    lastLine: int
 
 
 class OutputList:

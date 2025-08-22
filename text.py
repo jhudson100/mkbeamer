@@ -19,11 +19,41 @@ specials={
     "}"     : r"{\}}",
     "~"     : r"\textasciitilde{}",
 }
+
+
+#simple string constant
+class TextNode(LeafNode):
+    def __init__(self,txt:str):
+        super().__init__()
+        self.data=txt
+
+def BoldNode(NonleafNode):
+    pass
+
+def ItalicNode(NonleafNode):
+    pass
+
+def HyperlinkNode(SemileafNode):
+    def __init__(self,displayText:TreeNode,target:str):
+        super().__init__()
+        self.children.append(displayText)
+        self.target=target
+    def addChild(self,n:TreeNode):
+        assert 0
+        
 #output inline text, processing backslashes (\), pipes (|alpha|), and inline directives
-def outputText(output: list[str], line: Line, docroot):
+def process(line: Line, docroot) -> TreeNode:
     i=0
     o=[]
+    container = NonleafNode()
 
+    def flush():
+        if len(o):
+            tmp = TextNode("".join(o))
+            container.addChild( tmp )
+            del o[:]
+            
+            
     while i < len(line.content):
         if line.content.startswith("\\",i):
             #next character is special:
@@ -51,19 +81,23 @@ def outputText(output: list[str], line: Line, docroot):
                 url=m.group(2).strip()
                 if not display:
                     display=url
-                o.append("\\href{"+url+"}{"+display+"}")
+                h = HyperlinkNode(displayText=TextNode(display),
+                                  url=url)
+                flush()
+                container.addChild(h)
+                # ~ o.append("\\href{"+url+"}{"+display+"}")
                 i = m.end()
         elif line.startswith("**",i) or line.startswith("*",i) or line.startswith("__",i):
             if line.startswith("**",i):
-                mode="textbf"
+                # ~ mode="textbf"
                 j=i+2
                 want="**"
             elif line.startswith("__",i):
-                mode="underline"
+                # ~ mode="underline"
                 j=i+2
                 want="__"
             else:
-                mode="textit"
+                # ~ mode="textit"
                 j=i+1
                 want="*"
             while j < len(line.content) and not line.content.startswith(want,j):
@@ -71,9 +105,11 @@ def outputText(output: list[str], line: Line, docroot):
             if j == len(line.content):
                 error(f"Unclosed {want} on line {line.number} (match for column {i})")
             txt = line.content[i+len(want):j]
-            o.append("\\"+mode+"{")
-            outputText(o,Line(number=line.number,content=txt),docroot)
-            o.append("}")
+
+FINISH
+            # ~ o.append("\\"+mode+"{")
+            # ~ outputText(o,Line(number=line.number,content=txt),docroot)
+            # ~ o.append("}")
             i = j+len(want)
         elif line.startswith("|",i):
             #fancy character

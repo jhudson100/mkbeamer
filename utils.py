@@ -4,7 +4,67 @@ import sys
 
 from dataclasses import dataclass
 
+class TreeNode:
+    def __init__(self):
+        pass
+    def walk(self,precallback=None,postcallback=None):
+        try:
+            self._walk(precallback,postcallback)
+        except StopIteration:
+            pass
+    def _walk(self,precallback,postcallback):
+        assert 0
+        
+    def getChildren(self) -> list[TreeNode]:
+        assert 0
+        
+class LeafNode(TreeNode):
+    def __init__(self):
+        pass
+    def getChildren(self):
+        return []
+    def _walk(self,precallback,postcallback):
+        if precallback:
+            precallback(self)
+        if postcallback:
+            postcallback(self)
 
+#node's children are fixed at creation time;
+#cannot add arbitrary number of children
+class SemileafNode(TreeNode):
+    def __init__(self):
+        self.children=[]
+    def getChildren(self):
+        return self.children
+    def _walk(self,precallback,postcallback):
+        if precallback:
+            precallback(self)
+        for c in self.getChildren():
+            c.walk(style,precallback=precallback,postcallback=postcallback)
+        if postcallback:
+            postcallback(self)
+    
+class NonleafNode(FixedChildNode):
+    def __init__(self):
+        super().__init__()
+    def addChild(self, n: TreeNode):
+        self.children.append(n)
+        
+class LineList:
+    def __init__(self,lines):
+        self.lines=lines
+        self.i=0
+    def peek(self):
+        if self.i == len(self.lines):
+            return None
+        return self.lines[self.i]
+    def next(self):
+        if self.i == len(self.lines):
+            return None
+        t = self.lines[self.i]
+        self.i+=1
+        return t
+        
 #one line of text from the input file
 @dataclass
 class Line:
